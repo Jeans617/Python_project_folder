@@ -33,6 +33,17 @@ rocket_img = pygame.transform.scale(rocket_img, (40, 60))
 thrust_img = pygame.image.load("assets/thruster.png")
 thrust_img = pygame.transform.scale(thrust_img, (40, 20))
 thrust_img = pygame.transform.flip(thrust_img, False, True)
+celestial_bodies = [
+    {"name": "Moon", "fact": "The Moon has no atmosphere, which means there’s no weather!"},
+    {"name": "Mercury", "fact": "Mercury is the closest planet to the Sun but not the hottest."},
+    {"name": "Mars", "fact": "Mars has the tallest volcano in the solar system: Olympus Mons."},
+    {"name": "Venus", "fact": "A day on Venus is longer than its year."},
+    {"name": "Earth", "fact": "Earth is the only planet known to support life."},
+    {"name": "Uranus", "fact": "Uranus rotates on its side, making its seasons extreme."},
+    {"name": "Saturn", "fact": "Saturn’s rings are made mostly of ice particles."},
+    {"name": "Neptune", "fact": "Neptune has the fastest winds in the solar system — over 1,300 mph!"}
+]
+
 # Colors
 WHITE = (255, 255, 255)
 BLACK = (0, 0, 0)
@@ -111,6 +122,25 @@ def move_pad():
     # Keep the landing pad within the movement bounds
     landing_pad_x = max(pad_center_x - pad_range, min(pad_center_x + pad_range - landing_pad_width, landing_pad_x))
 
+def wrap_text(text, font, max_width):
+    """Wraps text into multiple lines based on the max width."""
+    words = text.split(' ')
+    lines = []
+    current_line = ""
+
+    for word in words:
+        test_line = f"{current_line} {word}".strip()
+        if font.size(test_line)[0] <= max_width:
+            current_line = test_line
+        else:
+            lines.append(current_line)
+            current_line = word
+
+    if current_line:
+        lines.append(current_line)
+
+    return lines
+
 # Initialize game variables
 reset_game()
 
@@ -124,6 +154,37 @@ def show_start_screen():
     screen.blit(message, message_rect)
     pygame.display.flip()
 
+def show_loading_screen(show_controls=False):
+    """Displays the loading screen with a fun fact and optional controls."""
+    screen.fill(BLACK)
+    font = pygame.font.Font(None, 28)
+
+    current_body = celestial_bodies[min(successful_landings, len(celestial_bodies) - 1)]
+    name_text = font.render(f"Approaching: {current_body['name']}", True, WHITE)
+    screen.blit(name_text, (WIDTH // 2 - name_text.get_width() // 2, HEIGHT // 2 - 100))
+
+    # Wrap the fact text to fit within the screen
+    wrapped_lines = wrap_text(current_body['fact'], font, WIDTH - 40)
+    for i, line in enumerate(wrapped_lines):
+        line_surface = font.render(line, True, WHITE)
+        screen.blit(line_surface, (WIDTH // 2 - line_surface.get_width() // 2, HEIGHT // 2 - 60 + i * 30))
+
+    if show_controls:
+        control_font = pygame.font.Font(None, 24)
+        controls = [
+            "Controls:",
+            "← → : Move Left/Right",
+            "Space: Thrust",
+            "R: Retry if you crash"
+        ]
+        for i, text in enumerate(controls):
+            control_text = control_font.render(text, True, WHITE)
+            screen.blit(control_text, (WIDTH // 2 - control_text.get_width() // 2, HEIGHT - 120 + i * 25))
+       
+
+    pygame.display.flip()
+    pygame.time.wait(4000)
+
 start_screen = True
 while start_screen:
     for event in pygame.event.get():
@@ -134,8 +195,11 @@ while start_screen:
             start_screen = False  # Exit start screen when any key is pressed
 
     show_start_screen()
-    clock.tick(30)
+    clock.tick(30) 
+show_loading_screen(show_controls=True)
 
+# Initialize the first level
+reset_game()
 # Main game loop
 running = True
 while running:
@@ -197,16 +261,10 @@ while running:
 
     # If landed, show the "Next Level" message
     if landed:
-        font = pygame.font.Font(None, 24)
-        status = font.render("Next Level! Preparing...", True, GREEN)
-        screen.blit(status, (WIDTH // 2 - 100, HEIGHT // 2))
-        pygame.display.flip()
+     show_loading_screen()  # ⬅️ This is the new fun fact screen
 
-        # Wait for a moment before resetting for next level (show for 2 seconds)
-        pygame.time.wait(2000)
+     reset_game()  # Then reset and move to the next planet
 
-        # After the message, reset game state for the next level
-        reset_game()
 
     # Display the crash message before resetting
     if crashed:
