@@ -6,18 +6,39 @@ pygame.init()
 
 # Constants
 WIDTH, HEIGHT = 500, 600
-g = 0.05  # placeholder gravity level, need to change to simulate gravity on various planets
+gravity_level = 0
+gravity_values = [
+    0.0154,  # Moon
+    0.0352,  # Mercury
+    0.0354,  # Mars
+    0.0843,  # Venus
+    0.0933,  # Earth
+    0.0826,  # Uranus
+    0.099,  # saturn
+    0.11,  # neptune
+]
+planet_names = [
+    "Moon", "Mercury", "Mars", "Venus", "Earth",
+    "Uranus", "Neptune", "Saturn", "Jupiter"
+]
+g = gravity_values[min(gravity_level, len(gravity_values) - 1)]
+angle = 0
 thrust = -0.15  # Thrust power
 fuel_max = 100  # Maximum fuel
 horizontal_speed = 2  # Speed for left/right movement
 landing_pad_y = HEIGHT - 20  # Fixed vertical position for landing pad
 landing_pad_width = 100  # Width of the landing pad
-
+rocket_img = pygame.image.load("assets/rocket.png.webp")
+rocket_img = pygame.transform.scale(rocket_img, (40, 60))
+thrust_img = pygame.image.load("assets/thruster.png")
+thrust_img = pygame.transform.scale(thrust_img, (40, 20))
+thrust_img = pygame.transform.flip(thrust_img, False, True)
 # Colors
 WHITE = (255, 255, 255)
 BLACK = (0, 0, 0)
 RED = (255, 0, 0)
 GREEN = (0, 255, 0)
+
 
 # Setup display
 screen = pygame.display.set_mode((WIDTH, HEIGHT))
@@ -27,7 +48,6 @@ pygame.display.set_caption("Rocket Landing Simulator")
 clock = pygame.time.Clock()
 
 # Difficulty progression variables (initialized globally)
-gravity_level = 0  # Tracks gravity increase level
 pad_size_level = 0  # Tracks the landing pad shrinkage level
 pad_move_level = 1  # Tracks landing pad movement level
 pad_speed = 0.5  # Starting speed of the pad's movement (slower speed)
@@ -38,10 +58,11 @@ pad_center_x = random.randint(50, WIDTH - landing_pad_width - 50)  # Starting ce
 
 def reset_game(reset_difficulty=False):
     """Resets game variables for a new attempt. Optionally resets difficulty."""
-    global rocket, velocity_y, velocity_x, fuel_remaining, landed, crashed, landing_pad_x, landing_pad_width, g, gravity_level, pad_size_level, pad_move_level, pad_speed, pad_direction, pad_range, successful_landings, pad_center_x
+    global rocket, velocity_y, angle, velocity_x, fuel_remaining, landed, crashed, landing_pad_x, landing_pad_width, g, gravity_level, pad_size_level, pad_move_level, pad_speed, pad_direction, pad_range, successful_landings, pad_center_x
     
     if reset_difficulty:
-        gravity_level = 0  # Reset gravity progression
+        angle = 0
+        gravity_level = 0
         pad_size_level = 0  # Reset pad size progression
         pad_move_level = 1  # Reset pad movement progression
         landing_pad_width = 100  # Reset landing pad width to initial value
@@ -56,8 +77,7 @@ def reset_game(reset_difficulty=False):
     fuel_remaining = fuel_max
     landed = False
     crashed = False
-   
-    g = 0.05 + gravity_level * 0.01  # Increase gravity with each level
+    g = gravity_values[min(gravity_level, len(gravity_values) - 1)]
     landing_pad_x = pad_center_x - landing_pad_width // 2  # Center the landing pad initially at the specified center position
     landing_pad_width = max(50, landing_pad_width - pad_size_level  * 5)  # Shrink the pad based on difficulty
 
@@ -119,7 +139,10 @@ while start_screen:
 # Main game loop
 running = True
 while running:
+    # Get current planet name
     screen.fill(BLACK)
+
+
 
     for event in pygame.event.get():
         if event.type == pygame.QUIT:
@@ -138,11 +161,14 @@ while running:
         if keys[pygame.K_LEFT] and fuel_remaining > 0:
             velocity_x = -horizontal_speed  # Move left
             fuel_remaining -= 0.5  # Small fuel usage for horizontal movement
+            angle = 15
         elif keys[pygame.K_RIGHT] and fuel_remaining > 0:
             velocity_x = horizontal_speed  # Move right
             fuel_remaining -= 0.5
+            angle = -15
         else:
             velocity_x = 0  # Stop horizontal movement when no key is pressed
+            angle = 0
 
         velocity_y += g  # Apply gravity
         rocket.y += velocity_y  # Update vertical position
@@ -204,9 +230,15 @@ while running:
         move_pad()
 
     # Draw rocket and landing pad
-    pygame.draw.rect(screen, WHITE, rocket)
-    pygame.draw.rect(screen, WHITE, (landing_pad_x, landing_pad_y, landing_pad_width, 10))  # Landing pad
+    rotated_rocket = pygame.transform.rotate(rocket_img, angle)
+    rotated_rect = rotated_rocket.get_rect(center=rocket.center)
+    screen.blit(rotated_rocket, rotated_rect.topleft)
 
+    if keys[pygame.K_SPACE] and fuel_remaining > 0:
+        rotated_thrust = pygame.transform.rotate(thrust_img, angle)
+        thrust_rect = rotated_thrust.get_rect(center=(rocket.centerx, rocket.bottom))
+        screen.blit(rotated_thrust, thrust_rect.topleft) 
+    pygame.draw.rect(screen, WHITE, (landing_pad_x, landing_pad_y, landing_pad_width, 10))  # Landing pad
     # Display status text
     font = pygame.font.Font(None, 24)
     fuel_text = font.render(f"Fuel: {fuel_remaining}", True, WHITE)
@@ -214,8 +246,9 @@ while running:
 
     # Display difficulty progression
     font = pygame.font.Font(None, 24)
-    difficulty_text = font.render(f"Difficulty: Level {pad_move_level}", True, WHITE)
-    screen.blit(difficulty_text, (WIDTH - 150, 10))
+    current_planet = planet_names[min(gravity_level, len(planet_names) - 1)]
+    planet_text = font.render(f"Celestial body: {current_planet}", True, WHITE)
+    screen.blit(planet_text, (10, 35))
 
     pygame.display.flip()
     clock.tick(30)  # Maintain frame rate
