@@ -17,6 +17,13 @@ gravity_values = [
     0.099,  # saturn
     0.11,  # neptune
 ]
+background_images = [
+    pygame.transform.scale(pygame.image.load("assets/placeholder_background.webp"), (WIDTH, HEIGHT)),
+    pygame.transform.scale(pygame.image.load("assets/placeholder_2.jpg"), (WIDTH, HEIGHT)),
+    pygame.transform.scale(pygame.image.load("assets/placeholder_3.jpg"), (WIDTH, HEIGHT)),
+    pygame.transform.scale(pygame.image.load("assets/placeholder_4.webp"), (WIDTH, HEIGHT)),
+]
+
 planet_names = [
     "Moon", "Mercury", "Mars", "Venus", "Earth",
     "Uranus", "Neptune", "Saturn", "Jupiter"
@@ -69,7 +76,7 @@ pad_center_x = random.randint(50, WIDTH - landing_pad_width - 50)  # Starting ce
 
 def reset_game(reset_difficulty=False):
     """Resets game variables for a new attempt. Optionally resets difficulty."""
-    global rocket, velocity_y, angle, velocity_x, fuel_remaining, landed, crashed, landing_pad_x, landing_pad_width, g, gravity_level, pad_size_level, pad_move_level, pad_speed, pad_direction, pad_range, successful_landings, pad_center_x
+    global current_background, rocket, velocity_y, angle, velocity_x, fuel_remaining, landed, crashed, landing_pad_x, landing_pad_width, g, gravity_level, pad_size_level, pad_move_level, pad_speed, pad_direction, pad_range, successful_landings, pad_center_x
     
     if reset_difficulty:
         angle = 0
@@ -86,6 +93,8 @@ def reset_game(reset_difficulty=False):
     velocity_y = 0
     velocity_x = 0
     fuel_remaining = fuel_max
+    current_background = background_images[successful_landings % len(background_images)]
+
     landed = False
     crashed = False
     g = gravity_values[min(gravity_level, len(gravity_values) - 1)]
@@ -203,8 +212,8 @@ reset_game()
 # Main game loop
 running = True
 while running:
-    # Get current planet name
-    screen.fill(BLACK)
+    
+    screen.blit(current_background, (0, 0))
 
 
 
@@ -224,11 +233,11 @@ while running:
 
         if keys[pygame.K_LEFT] and fuel_remaining > 0:
             velocity_x = -horizontal_speed  # Move left
-            fuel_remaining -= 0.5  # Small fuel usage for horizontal movement
+            fuel_remaining -= 0.25  # Small fuel usage for horizontal movement
             angle = 15
         elif keys[pygame.K_RIGHT] and fuel_remaining > 0:
             velocity_x = horizontal_speed  # Move right
-            fuel_remaining -= 0.5
+            fuel_remaining -= 0.25
             angle = -15
         else:
             velocity_x = 0  # Stop horizontal movement when no key is pressed
@@ -244,7 +253,7 @@ while running:
         # Check landing
         if rocket.bottom >= landing_pad_y:
             if landing_pad_x <= rocket.x <= landing_pad_x + landing_pad_width - rocket.width:
-                if velocity_y > 5:  # Too fast = crash
+                if velocity_y > 8:  # Too fast = crash
                     crashed = True
                 else:
                     landed = True  # Safe landing
