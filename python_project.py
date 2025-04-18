@@ -18,7 +18,7 @@ gravity_values = [
     0.11,  # neptune
 ]
 background_images = [
-    pygame.transform.scale(pygame.image.load("assets/placeholder_background.webp"), (WIDTH, HEIGHT)),
+    pygame.transform.scale(pygame.image.load("assets/moon_background.jpg"), (WIDTH, HEIGHT)),
     pygame.transform.scale(pygame.image.load("assets/placeholder_2.jpg"), (WIDTH, HEIGHT)),
     pygame.transform.scale(pygame.image.load("assets/placeholder_3.jpg"), (WIDTH, HEIGHT)),
     pygame.transform.scale(pygame.image.load("assets/placeholder_4.webp"), (WIDTH, HEIGHT)),
