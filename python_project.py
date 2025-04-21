@@ -22,6 +22,7 @@ background_images = [
     pygame.transform.scale(pygame.image.load("assets/placeholder_2.jpg"), (WIDTH, HEIGHT)),
     pygame.transform.scale(pygame.image.load("assets/placeholder_3.jpg"), (WIDTH, HEIGHT)),
     pygame.transform.scale(pygame.image.load("assets/placeholder_4.webp"), (WIDTH, HEIGHT)),
+    pygame.transform.scale(pygame.image.load("assets/earth_background.jpg"), (WIDTH, HEIGHT))
 ]
 
 planet_names = [
@@ -182,7 +183,7 @@ def show_loading_screen(show_controls=False):
         control_font = pygame.font.Font(None, 24)
         controls = [
             "Controls:",
-            "← → : Move Left/Right",
+            "< > : Move Left/Right",
             "Space: Thrust",
             "R: Retry if you crash"
         ]
