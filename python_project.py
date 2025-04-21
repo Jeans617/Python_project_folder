@@ -27,11 +27,11 @@ background_images = [
 
 planet_names = [
     "Moon", "Mercury", "Mars", "Venus", "Earth",
-    "Uranus", "Neptune", "Saturn", "Jupiter"
+    "Uranus", "Saturn", "Neptune"
 ]
 g = gravity_values[min(gravity_level, len(gravity_values) - 1)]
 angle = 0
-thrust = -0.15  # Thrust power
+thrust = -0.2  # Thrust power
 fuel_max = 100  # Maximum fuel
 horizontal_speed = 2  # Speed for left/right movement
 landing_pad_y = HEIGHT - 20  # Fixed vertical position for landing pad
@@ -169,31 +169,104 @@ def show_loading_screen(show_controls=False):
     screen.fill(BLACK)
     font = pygame.font.Font(None, 28)
 
-    current_body = celestial_bodies[min(successful_landings, len(celestial_bodies) - 1)]
-    name_text = font.render(f"Approaching: {current_body['name']}", True, WHITE)
-    screen.blit(name_text, (WIDTH // 2 - name_text.get_width() // 2, HEIGHT // 2 - 100))
+    
+    if successful_landings >= 8:  # After Neptune, trigger bonus level
+        bonus_font = pygame.font.Font(None, 30)
+        bonus_message = "You beat the game! Time for a super secret bonus level!"
 
-    # Wrap the fact text to fit within the screen
-    wrapped_lines = wrap_text(current_body['fact'], font, WIDTH - 40)
-    for i, line in enumerate(wrapped_lines):
-        line_surface = font.render(line, True, WHITE)
-        screen.blit(line_surface, (WIDTH // 2 - line_surface.get_width() // 2, HEIGHT // 2 - 60 + i * 30))
+        # Wrap the bonus level message to fit the screen
+        wrapped_lines = wrap_text(bonus_message, bonus_font, WIDTH - 40)
 
-    if show_controls:
-        control_font = pygame.font.Font(None, 24)
-        controls = [
-            "Controls:",
-            "< > : Move Left/Right",
-            "Space: Thrust",
-            "R: Retry if you crash"
-        ]
-        for i, text in enumerate(controls):
-            control_text = control_font.render(text, True, WHITE)
-            screen.blit(control_text, (WIDTH // 2 - control_text.get_width() // 2, HEIGHT - 120 + i * 25))
-       
+        # Display the bonus level message with a black background
+        for i, line in enumerate(wrapped_lines):
+            line_surface = bonus_font.render(line, True, WHITE)
+            screen.blit(line_surface, (WIDTH // 2 - line_surface.get_width() // 2, HEIGHT // 3 + i * 40))
 
-    pygame.display.flip()
-    pygame.time.wait(4000)
+        pygame.display.flip()
+        pygame.time.wait(2000)  # Wait for 2 seconds before proceeding to the next part
+
+        # Now display "Approaching: The Sun" and the fun fact
+        sun_font = pygame.font.Font(None, 30)
+        approaching_sun_message = "Approaching: The Sun"
+        fun_fact_sun = "The Sun is 99.86% of the mass in the solar system!"
+
+        # Wrap both the messages to fit the screen
+        wrapped_approaching_sun = wrap_text(approaching_sun_message, sun_font, WIDTH - 40)
+        wrapped_sun_fact = wrap_text(fun_fact_sun, sun_font, WIDTH - 40)
+
+        # Draw "Approaching: The Sun" message
+        for i, line in enumerate(wrapped_approaching_sun):
+            line_surface = sun_font.render(line, True, WHITE)
+            screen.blit(line_surface, (WIDTH // 2 - line_surface.get_width() // 2, HEIGHT // 3 + 60 + i * 30))
+
+        # Draw fun fact about the Sun
+        for i, line in enumerate(wrapped_sun_fact):
+            line_surface = sun_font.render(line, True, WHITE)
+            screen.blit(line_surface, (WIDTH // 2 - line_surface.get_width() // 2, HEIGHT // 3 + 100 + i * 30))
+
+        pygame.display.flip()
+        pygame.time.wait(2000)  # Wait for 2 seconds before starting the rocket fall
+
+        # Change the background to orange (Sun-like color)
+        screen.fill((255, 140, 0))  # Sun-like background color
+
+        # Apply high gravity and make the rocket fall rapidly
+        g = 10  # Ridiculously high gravity
+        velocity_y = 0  # Reset vertical velocity
+        while rocket.y < HEIGHT - rocket.height:
+            velocity_y += g  # Apply gravity
+            rocket.y += velocity_y  # Update vertical position
+
+            # Redraw background and rocket
+            rotated_rocket = pygame.transform.rotate(rocket_img, angle)
+            rotated_rect = rotated_rocket.get_rect(center=rocket.center)
+            screen.blit(rotated_rocket, rotated_rect.topleft)
+
+            pygame.display.flip()
+            clock.tick(60)  # Maintain frame rate
+
+        # After the rocket reaches the bottom, display "Game Over"
+        game_over_font = pygame.font.Font(None, 40)
+        game_over_message = game_over_font.render("Game Over!", True, WHITE)
+        game_over_rect = game_over_message.get_rect(center=(WIDTH // 2, HEIGHT // 2))
+        screen.blit(game_over_message, game_over_rect)
+
+        pygame.display.flip()
+        pygame.time.wait(2000)  # Wait for 2 seconds before exiting
+
+        pygame.quit()
+        exit()
+
+    else:
+        # Regular fun fact display if not in bonus level
+        current_body = celestial_bodies[min(successful_landings, len(celestial_bodies) - 1)]
+        name_text = font.render(f"Approaching: {current_body['name']}", True, WHITE)
+        screen.blit(name_text, (WIDTH // 2 - name_text.get_width() // 2, HEIGHT // 2 - 100))
+
+        # Wrap the fact text to fit within the screen
+        wrapped_lines = wrap_text(current_body['fact'], font, WIDTH - 40)
+        for i, line in enumerate(wrapped_lines):
+            line_surface = font.render(line, True, WHITE)
+            screen.blit(line_surface, (WIDTH // 2 - line_surface.get_width() // 2, HEIGHT // 2 - 60 + i * 30))
+
+        if show_controls:
+            control_font = pygame.font.Font(None, 24)
+            controls = [
+                "Controls:",
+                "< > : Move Left/Right",
+                "Space: Thrust",
+                "R: Retry if you crash"
+            ]
+            for i, text in enumerate(controls):
+                control_text = control_font.render(text, True, WHITE)
+                screen.blit(control_text, (WIDTH // 2 - control_text.get_width() // 2, HEIGHT - 120 + i * 25))
+
+        pygame.display.flip()
+        pygame.time.wait(4000)  # Wait before proceeding
+
+
+
+
 
 start_screen = True
 while start_screen:
@@ -253,8 +326,12 @@ while running:
 
         # Check landing
         if rocket.bottom >= landing_pad_y:
-            if landing_pad_x <= rocket.x <= landing_pad_x + landing_pad_width - rocket.width:
-                if velocity_y > 8:  # Too fast = crash
+            rocket_center = rocket.x + rocket.width / 2
+            left_limit = landing_pad_x - rocket.width / 2
+            right_limit = landing_pad_x + landing_pad_width - rocket.width / 2
+
+            if left_limit <= rocket_center <= right_limit:
+                if velocity_y > 15:  # Too fast = crash
                     crashed = True
                 else:
                     landed = True  # Safe landing
