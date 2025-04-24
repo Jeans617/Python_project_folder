@@ -19,9 +19,9 @@ gravity_values = [
 ]
 background_images = [
     pygame.transform.scale(pygame.image.load("assets/moon_background.jpg"), (WIDTH, HEIGHT)),
-    pygame.transform.scale(pygame.image.load("assets/placeholder_2.jpg"), (WIDTH, HEIGHT)),
-    pygame.transform.scale(pygame.image.load("assets/placeholder_3.jpg"), (WIDTH, HEIGHT)),
-    pygame.transform.scale(pygame.image.load("assets/placeholder_4.webp"), (WIDTH, HEIGHT)),
+    pygame.transform.scale(pygame.image.load("assets/merc_background.jpg"), (WIDTH, HEIGHT)),
+    pygame.transform.scale(pygame.image.load("assets/mars_background.jpg"), (WIDTH, HEIGHT)),
+    pygame.transform.scale(pygame.image.load("assets/venus_background.jpg"), (WIDTH, HEIGHT)),
     pygame.transform.scale(pygame.image.load("assets/earth_background.jpg"), (WIDTH, HEIGHT))
 ]
 
