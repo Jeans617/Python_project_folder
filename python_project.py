@@ -17,6 +17,7 @@ gravity_values = [
     0.099,  # saturn
     0.11,  # neptune
 ]
+
 background_images = [
     pygame.transform.scale(pygame.image.load("assets/moon_background.jpg"), (WIDTH, HEIGHT)),
     pygame.transform.scale(pygame.image.load("assets/merc_background.jpg"), (WIDTH, HEIGHT)),
@@ -27,11 +28,11 @@ background_images = [
 
 planet_names = [
     "Moon", "Mercury", "Mars", "Venus", "Earth",
-    "Uranus", "Neptune", "Saturn", "Jupiter"
+    "Uranus", "Saturn", "Neptune"
 ]
 g = gravity_values[min(gravity_level, len(gravity_values) - 1)]
 angle = 0
-thrust = -0.15  # Thrust power
+thrust = -0.2  # Thrust power
 fuel_max = 100  # Maximum fuel
 horizontal_speed = 2  # Speed for left/right movement
 landing_pad_y = HEIGHT - 20  # Fixed vertical position for landing pad
@@ -42,15 +43,48 @@ thrust_img = pygame.image.load("assets/thruster.png")
 thrust_img = pygame.transform.scale(thrust_img, (40, 20))
 thrust_img = pygame.transform.flip(thrust_img, False, True)
 celestial_bodies = [
-    {"name": "Moon", "fact": "The Moon has no atmosphere, which means there’s no weather!"},
-    {"name": "Mercury", "fact": "Mercury is the closest planet to the Sun but not the hottest."},
-    {"name": "Mars", "fact": "Mars has the tallest volcano in the solar system: Olympus Mons."},
-    {"name": "Venus", "fact": "A day on Venus is longer than its year."},
-    {"name": "Earth", "fact": "Earth is the only planet known to support life."},
-    {"name": "Uranus", "fact": "Uranus rotates on its side, making its seasons extreme."},
-    {"name": "Saturn", "fact": "Saturn’s rings are made mostly of ice particles."},
-    {"name": "Neptune", "fact": "Neptune has the fastest winds in the solar system — over 1,300 mph!"}
+    {"name": "Moon", "facts": [
+        "The Moon has no atmosphere, which means there’s no weather!",
+        "Moonquakes can last up to an hour!",
+        "Footprints on the Moon can last millions of years."
+    ]},
+    {"name": "Mercury", "facts": [
+        "Mercury is the closest planet to the Sun but not the hottest.",
+        "A day on Mercury is longer than its year.",
+        "Mercury has ice in some of its craters."
+    ]},
+    {"name": "Mars", "facts": [
+        "Mars has the tallest volcano in the solar system: Olympus Mons.",
+        "Mars has seasons like Earth due to its tilted axis.",
+        "Dust storms on Mars can cover the entire planet."
+    ]},
+    {"name": "Venus", "facts": [
+        "A day on Venus is longer than its year.",
+        "Venus spins in the opposite direction of most planets.",
+        "Venus is the hottest planet in the solar system."
+    ]},
+    {"name": "Earth", "facts": [
+        "Earth is the only planet known to support life.",
+        "About 71% of Earth's surface is covered in water.",
+        "Earth's atmosphere protects us from meteoroids and radiation."
+    ]},
+    {"name": "Uranus", "facts": [
+        "Uranus rotates on its side, making its seasons extreme.",
+        "Uranus was the first planet discovered with a telescope.",
+        "It has faint rings made of dark particles."
+    ]},
+    {"name": "Saturn", "facts": [
+        "Saturn’s rings are made mostly of ice particles.",
+        "Saturn has over 80 moons.",
+        "Saturn is less dense than water — it would float in a giant bathtub!"
+    ]},
+    {"name": "Neptune", "facts": [
+        "Neptune has the fastest winds in the solar system — over 1,300 mph!",
+        "Neptune was discovered using mathematics before it was seen.",
+        "It has a moon, Triton, that orbits backward."
+    ]}
 ]
+fact_indices = [0 for _ in celestial_bodies]
 
 # Colors
 WHITE = (255, 255, 255)
@@ -101,7 +135,7 @@ def reset_game(reset_difficulty=False):
     g = gravity_values[min(gravity_level, len(gravity_values) - 1)]
     landing_pad_x = pad_center_x - landing_pad_width // 2  # Center the landing pad initially at the specified center position
     landing_pad_width = max(50, landing_pad_width - pad_size_level  * 5)  # Shrink the pad based on difficulty
-
+    
     # If the landing pad moves, initialize the movement logic
     if pad_move_level > 1:  # Pad movement starts at level 1
         # Adjust the speed and range based on the number of successful landings
@@ -117,6 +151,7 @@ def reset_game(reset_difficulty=False):
         if successful_landings >= 12:
             pad_speed = 1.2  # Speed increases
             pad_range = 150  # Further increase range
+    
 
 def move_pad():
     """Oscillates the landing pad back and forth based on the difficulty level."""
@@ -169,31 +204,110 @@ def show_loading_screen(show_controls=False):
     screen.fill(BLACK)
     font = pygame.font.Font(None, 28)
 
-    current_body = celestial_bodies[min(successful_landings, len(celestial_bodies) - 1)]
-    name_text = font.render(f"Approaching: {current_body['name']}", True, WHITE)
-    screen.blit(name_text, (WIDTH // 2 - name_text.get_width() // 2, HEIGHT // 2 - 100))
+    
+    if successful_landings >= 8:  # After Neptune, trigger bonus level
+        bonus_font = pygame.font.Font(None, 30)
+        bonus_message = "You beat the game! Time for a super secret bonus level!"
 
-    # Wrap the fact text to fit within the screen
-    wrapped_lines = wrap_text(current_body['fact'], font, WIDTH - 40)
-    for i, line in enumerate(wrapped_lines):
-        line_surface = font.render(line, True, WHITE)
-        screen.blit(line_surface, (WIDTH // 2 - line_surface.get_width() // 2, HEIGHT // 2 - 60 + i * 30))
+        # Wrap the bonus level message to fit the screen
+        wrapped_lines = wrap_text(bonus_message, bonus_font, WIDTH - 40)
 
-    if show_controls:
-        control_font = pygame.font.Font(None, 24)
-        controls = [
-            "Controls:",
-            "< > : Move Left/Right",
-            "Space: Thrust",
-            "R: Retry if you crash"
-        ]
-        for i, text in enumerate(controls):
-            control_text = control_font.render(text, True, WHITE)
-            screen.blit(control_text, (WIDTH // 2 - control_text.get_width() // 2, HEIGHT - 120 + i * 25))
-       
+        # Display the bonus level message with a black background
+        for i, line in enumerate(wrapped_lines):
+            line_surface = bonus_font.render(line, True, WHITE)
+            screen.blit(line_surface, (WIDTH // 2 - line_surface.get_width() // 2, HEIGHT // 3 + i * 40))
 
-    pygame.display.flip()
-    pygame.time.wait(4000)
+        pygame.display.flip()
+        pygame.time.wait(2000)  # Wait for 2 seconds before proceeding to the next part
+
+        # Now display "Approaching: The Sun" and the fun fact
+        sun_font = pygame.font.Font(None, 30)
+        approaching_sun_message = "Approaching: The Sun"
+        fun_fact_sun = "The Sun has an acceleration due to gravity of 247 m/s^2"
+
+        # Wrap both the messages to fit the screen
+        wrapped_approaching_sun = wrap_text(approaching_sun_message, sun_font, WIDTH - 40)
+        wrapped_sun_fact = wrap_text(fun_fact_sun, sun_font, WIDTH - 40)
+
+        # Draw "Approaching: The Sun" message
+        for i, line in enumerate(wrapped_approaching_sun):
+            line_surface = sun_font.render(line, True, WHITE)
+            screen.blit(line_surface, (WIDTH // 2 - line_surface.get_width() // 2, HEIGHT // 3 + 60 + i * 30))
+
+        # Draw fun fact about the Sun
+        for i, line in enumerate(wrapped_sun_fact):
+            line_surface = sun_font.render(line, True, WHITE)
+            screen.blit(line_surface, (WIDTH // 2 - line_surface.get_width() // 2, HEIGHT // 3 + 100 + i * 30))
+
+        pygame.display.flip()
+        pygame.time.wait(2000)  # Wait for 2 seconds before starting the rocket fall
+
+        # Change the background to orange (Sun-like color)
+        screen.fill((255, 140, 0))  # Sun-like background color
+
+        # Apply high gravity and make the rocket fall rapidly
+        g = 10  # Ridiculously high gravity
+        velocity_y = 0  # Reset vertical velocity
+        while rocket.y < HEIGHT - rocket.height:
+            velocity_y += g  # Apply gravity
+            rocket.y += velocity_y  # Update vertical position
+
+            # Redraw background and rocket
+            rotated_rocket = pygame.transform.rotate(rocket_img, angle)
+            rotated_rect = rotated_rocket.get_rect(center=rocket.center)
+            screen.blit(rotated_rocket, rotated_rect.topleft)
+
+            pygame.display.flip()
+            clock.tick(60)  # Maintain frame rate
+
+        # After the rocket reaches the bottom, display "Game Over"
+        game_over_font = pygame.font.Font(None, 40)
+        game_over_message = game_over_font.render("Game Over!", True, WHITE)
+        game_over_rect = game_over_message.get_rect(center=(WIDTH // 2, HEIGHT // 2))
+        screen.blit(game_over_message, game_over_rect)
+
+        pygame.display.flip()
+        pygame.time.wait(2000)  # Wait for 2 seconds before exiting
+
+        pygame.quit()
+        exit()
+
+    else:
+        # Regular fun fact display if not in bonus level
+        planet_index = min(successful_landings, len(celestial_bodies) - 1)
+        current_body = celestial_bodies[planet_index]
+        fact_index = fact_indices[planet_index]
+        fact_list = current_body['facts']
+        selected_fact = fact_list[fact_index]
+
+        fact_indices[planet_index] = (fact_index + 1) % len(fact_list)
+        name_text = font.render(f"Approaching: {current_body['name']}", True, WHITE)
+        screen.blit(name_text, (WIDTH // 2 - name_text.get_width() // 2, HEIGHT // 2 - 100))
+
+        # Wrap the fact text to fit within the screen
+        wrapped_lines = wrap_text(selected_fact, font, WIDTH - 40)
+        for i, line in enumerate(wrapped_lines):
+            line_surface = font.render(line, True, WHITE)
+            screen.blit(line_surface, (WIDTH // 2 - line_surface.get_width() // 2, HEIGHT // 2 - 60 + i * 30))
+
+        if show_controls:
+            control_font = pygame.font.Font(None, 24)
+            controls = [
+                "Controls:",
+                "< > : Move Left/Right",
+                "Space: Thrust",
+                "R: Retry if you crash"
+            ]
+            for i, text in enumerate(controls):
+                control_text = control_font.render(text, True, WHITE)
+                screen.blit(control_text, (WIDTH // 2 - control_text.get_width() // 2, HEIGHT - 120 + i * 25))
+
+        pygame.display.flip()
+        pygame.time.wait(4000)  # Wait before proceeding
+
+
+
+
 
 start_screen = True
 while start_screen:
@@ -221,7 +335,7 @@ while running:
     for event in pygame.event.get():
         if event.type == pygame.QUIT:
             running = False
-
+    
     keys = pygame.key.get_pressed()
 
     if keys[pygame.K_r]:  # Reset game if "R" is pressed
@@ -253,8 +367,12 @@ while running:
 
         # Check landing
         if rocket.bottom >= landing_pad_y:
-            if landing_pad_x <= rocket.x <= landing_pad_x + landing_pad_width - rocket.width:
-                if velocity_y > 8:  # Too fast = crash
+            rocket_center = rocket.x + rocket.width / 2
+            left_limit = landing_pad_x - rocket.width / 2
+            right_limit = landing_pad_x + landing_pad_width - rocket.width / 2
+
+            if left_limit <= rocket_center <= right_limit:
+                if velocity_y > 15:  # Too fast = crash
                     crashed = True
                 else:
                     landed = True  # Safe landing
