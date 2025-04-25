@@ -372,7 +372,7 @@ while running:
             right_limit = landing_pad_x + landing_pad_width - rocket.width / 2
 
             if left_limit <= rocket_center <= right_limit:
-                if velocity_y > 15:  # Too fast = crash
+                if velocity_y > 10:  # Too fast = crash
                     crashed = True
                 else:
                     landed = True  # Safe landing
