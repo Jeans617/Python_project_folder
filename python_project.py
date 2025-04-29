@@ -14,16 +14,19 @@ gravity_values = [
     0.0843,  # Venus
     0.0933,  # Earth
     0.0826,  # Uranus
-    0.099,  # saturn
-    0.11,  # neptune
-]
+    0.099,  # Saturn
+    0.11,  # Neptune
+    ]
 
 background_images = [
     pygame.transform.scale(pygame.image.load("assets/moon_background.jpg"), (WIDTH, HEIGHT)),
     pygame.transform.scale(pygame.image.load("assets/merc_background.jpg"), (WIDTH, HEIGHT)),
     pygame.transform.scale(pygame.image.load("assets/mars_background.jpg"), (WIDTH, HEIGHT)),
     pygame.transform.scale(pygame.image.load("assets/venus_background.jpg"), (WIDTH, HEIGHT)),
-    pygame.transform.scale(pygame.image.load("assets/earth_background.jpg"), (WIDTH, HEIGHT))
+    pygame.transform.scale(pygame.image.load("assets/earth_background.jpg"), (WIDTH, HEIGHT)),
+    pygame.transform.scale(pygame.image.load("assets/Uranus.jpg"), (WIDTH, HEIGHT)),
+    pygame.transform.scale(pygame.image.load("assets/Saturn.jpg"), (WIDTH, HEIGHT)),
+    pygame.transform.scale(pygame.image.load("assets/Neptune.jpg"), (WIDTH, HEIGHT))
 ]
 
 planet_names = [
@@ -46,7 +49,7 @@ celestial_bodies = [
     {"name": "Moon", "facts": [
         "The Moon has no atmosphere, which means there’s no weather!",
         "Moonquakes can last up to an hour!",
-        "Footprints on the Moon can last millions of years."
+        "Footprints on the Moon can last millions of years.", "The gravities in this game are based off real gravities"
     ]},
     {"name": "Mercury", "facts": [
         "Mercury is the closest planet to the Sun but not the hottest.",
@@ -193,7 +196,7 @@ reset_game()
 def show_start_screen():
     """Displays the start screen with instructions."""
     font = pygame.font.Font(None, 28)  # Smaller font size
-    message = font.render("Rocket Landing Simulator: Press any key to start", True, WHITE)
+    message = font.render("Gravity Knights: Press any key to start", True, WHITE)
     screen.fill(BLACK)
     message_rect = message.get_rect(center=(WIDTH // 2, HEIGHT // 2))  # Center the message
     screen.blit(message, message_rect)
@@ -372,7 +375,7 @@ while running:
             right_limit = landing_pad_x + landing_pad_width - rocket.width / 2
 
             if left_limit <= rocket_center <= right_limit:
-                if velocity_y > 10:  # Too fast = crash
+                if velocity_y > 15:  # Too fast = crash
                     crashed = True
                 else:
                     landed = True  # Safe landing
