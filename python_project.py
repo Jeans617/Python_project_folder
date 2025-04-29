@@ -98,7 +98,7 @@ GREEN = (0, 255, 0)
 
 # Setup display
 screen = pygame.display.set_mode((WIDTH, HEIGHT))
-pygame.display.set_caption("Rocket Landing Simulator")
+pygame.display.set_caption("Gravity Knights")
 
 # Clock for frame rate control
 clock = pygame.time.Clock()
@@ -194,12 +194,15 @@ reset_game()
 
 # Show start screen and wait for key press
 def show_start_screen():
+    screen.fill(BLACK)
     """Displays the start screen with instructions."""
     font = pygame.font.Font(None, 28)  # Smaller font size
-    message = font.render("Gravity Knights: Press any key to start", True, WHITE)
-    screen.fill(BLACK)
-    message_rect = message.get_rect(center=(WIDTH // 2, HEIGHT // 2))  # Center the message
-    screen.blit(message, message_rect)
+    startmes = "Gravity Knights: fight the force Press any key to start"
+    wrapped_startmes = wrap_text(startmes, font, WIDTH - 320)
+    for i, line in enumerate(wrapped_startmes):
+            line_surface = font.render(line, True, WHITE)
+            screen.blit(line_surface, (WIDTH // 2 - line_surface.get_width() // 2, HEIGHT // 2 - 60 + i * 30))
+   
     pygame.display.flip()
 
 def show_loading_screen(show_controls=False):
